@@ -1,0 +1,153 @@
+openapi: 3.0.0
+info:
+  title: Anon Feedback API
+  version: 1.0.0
+  description: Anonymous feedback app for meetups and chapters
+  contact:
+    name: Feedback Team
+    url: https://github.com/your-repo/anon-feedback
+
+servers:
+  - url: https://api.anonfeedback.com/v1
+    description: Production
+
+tags:
+  - name: Auth
+  - name: Chapters
+  - name: Meetups
+  - name: Feedback Forms
+  - name: Feedback Responses
+  - name: Users
+
+paths:
+  /auth/login:
+    post:
+      summary: Login for super admin , admin and viewer
+      tags: [Auth]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Auth token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /chapters:
+    get:
+      summary: List chapters
+      tags: [Chapters]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: List of chapters
+    post:
+      summary: Create a chapter
+      tags: [Chapters]
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChapterInput'
+      responses:
+        201:
+          description: Created
+
+  /chapters/{chapterId}/meetups:
+    post:
+      summary: Create a meetup in a chapter
+      tags: [Meetups]
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetupInput'
+      responses:
+        201:
+          description: Created
+
+  /meetups/{meetupId}/feedback-form:
+    post:
+      summary: Create feedback form for a meetup
+      tags: [Feedback Forms]
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackFormInput'
+      responses:
+        201:
+          description: Created
+
+  /feedback/{formId}/submit:
+    post:
+      summary: Submit feedback anonymously
+      tags: [Feedback Responses]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackSubmission'
+      responses:
+        200:
+          description: Feedback submitted
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ChapterInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    MeetupInput:
+      type: object
+      properties:
+        title:
+          type: string
+        date:
+          type: string
+          format: date-time
+
+    FeedbackFormInput:
+      type: object
+      properties:
+        questions:
+          type: array
+          items:
+            type: string
+
+    FeedbackSubmission:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            type: string
